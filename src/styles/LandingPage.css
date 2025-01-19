@@ -1,0 +1,133 @@
+html,
+body {
+  scroll-behavior: smooth;
+}
+
+.nav-item {
+  position: relative;
+  color: white; /* Default text color */
+  cursor: pointer;
+  transition: transform 0.3s ease, font-weight 0.3s ease;
+}
+
+.nav-item::after {
+  content: "";
+  position: absolute;
+  bottom: -4px; /* Distance from the text */
+  left: 50%; /* Start at the center */
+  width: 0;
+  height: 2px; /* Thickness of the line */
+  background-color: white;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-item:hover::after {
+  width: 100%; /* Expand the underline on hover */
+}
+
+.nav-item.active::after {
+  width: 100%; /* Persist the underline for the active link */
+}
+
+/* Ensure Montserrat font is applied across the site */
+* {
+  font-family: "Montserrat", sans-serif;
+}
+
+/* Styling for the buttons */
+/* Apply hover effect only to App Store and Play Store logos */
+.app-store,
+.play-store,
+.phones-web,
+.transition {
+  transition: transform 0.3s ease;
+}
+
+.app-store:hover,
+.play-store:hover,
+.phones-web:hover,
+.transition:hover {
+  transform: scale(1.05); /* Slight zoom effect on hover */
+}
+
+/* Adjust the text */
+.text-left {
+  text-align: left;
+}
+
+.text-white {
+  color: white;
+}
+
+.text-lg {
+  font-size: 1.125rem; /* Adjust the size of the smaller text */
+}
+
+.text-5xl {
+  font-size: 3rem; /* Adjust the size of the big text */
+}
+
+/* Slide-in effect */
+.menu-slide-in {
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.menu-open {
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-position: left top;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+@keyframes infiniteLoop {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-loop {
+  display: flex;
+  gap: 1.5rem;
+  width: calc(100% * 2); /* Twice the width for seamless looping */
+  animation: infiniteLoop 20s linear infinite;
+}
+
+@media (max-width: 900px) {
+  .background-image {
+    background-size: 85%;
+    height: 120%; /* Increase the height */
+  }
+}
+
+@media (max-width: 768px) {
+  .background-image {
+    background-size: 110%;
+  }
+}
+
+@media (max-width: 426px) {
+  .background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 90%;
+    width: 100%;
+    background-position: unset;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
