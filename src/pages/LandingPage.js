@@ -5,6 +5,7 @@ import FAQItem from "../components/FAQItem";
 import GoUpButton from "../components/GoUpButton";
 import { auth } from "../firebaseConfig"; // Import your Firebase config
 import { onAuthStateChanged } from "firebase/auth";
+// import Header from "../components/reusable/Header";
 
 import Logo from "../assets/page_logo.png";
 import ShapesWeb from "../assets/ShapesWeb.svg";
@@ -15,6 +16,7 @@ import GooglePlayLogo from "../assets/PlayStoreLogo.svg";
 import PlusIcon from "../assets/PlusIcon.svg";
 import StarIcon from "../assets/StarIcon.svg";
 import PhoneMockup from "../assets/PhoneMockup.png";
+import BackgroundImage from "../assets/MosqueImage.jpg";
 // import InstagramIcon from "../assets/Instagram.svg";
 // import FacebookIcon from "../assets/Facebook.svg";
 // import YoutubeIcon from "../assets/Youtube.svg";
@@ -33,73 +35,57 @@ const LandingPage = () => {
   return (
     <div className="relative w-full">
       {/* Scrollable Content */}
-      <div className="relative h-screen w-full">
-        {/* Left-Side Background */}
-        <div className="absolute top-0 left-0 h-full w-full z-0 overflow-hidden">
-          <div
-            className="background-image"
-            style={{
-              backgroundImage: `url(${ShapesWeb})`,
-            }}
-          ></div>
-
-          {/* Text and Buttons in front of ShapesWeb */}
-          <div className="absolute top-1/3 bottom-36 lg:bottom-40 left-6 lg:left-10 transform -translate-y-1/3 text-left z-10 text-white w-4/5 lg:w-3/5">
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold font-montserrat leading-tight text-gray-800 text-white">
-              Një Hap Më Pranë <br /> Xhamisë Suaj
-            </h1>
-            <p className="mt-4 text-xs sm:text-base lg:text-lg font-semibold font-montserrat text-gray-600 text-white">
-              Koha e namazit dhe ikametit, ngjarje, <br /> aktivitete,
-              donacione, dhe historia e xhamisë <br />– të gjitha në një vend.
-            </p>
-            {/* App Store & Google Play Buttons */}
-            <div className="mt-6 flex space-x-6">
-              <a
-                href="https://www.apple.com/app-store/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src={AppStoreLogo}
-                  alt="Download on the App Store"
-                  className="h-8 sm:h-12 md:h-12 lg:h-14 w-auto app-store"
-                />
-              </a>
-              <a
-                href="https://play.google.com/store"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  src={GooglePlayLogo}
-                  alt="Get it on Google Play"
-                  className="h-8 sm:h-12 md:h-12 lg:h-14 w-auto play-store"
-                />
-              </a>
-            </div>
-          </div>
-        </div>
-
-        {/* Right-Side Background Image */}
-        <img
-          src={GreenBGP}
-          alt="Green background pattern"
-          className="hidden lg:block absolute right-0 top-20 h-auto object-contain z-0 max-w-xs md:max-w-md"
-        />
-
-        {/* Right-Side Foreground Image */}
-        <img
-          src={PhonesWeb}
-          alt="Illustration of phones"
-          className="hidden lg:block absolute right-24 top-20 h-full object-contain z-10 phones-web"
-        />
+      {/* Scrollable Content */}
+      <div
+        className="relative h-screen w-full overflow-hidden bg-cover bg-center"
+        style={{ backgroundImage: `url(${BackgroundImage})` }}
+      >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-70"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-primary to-black opacity-55"></div>
 
         {/* Header */}
-        <Header />
+        <div className="absolute top-0 left-0 w-full z-20">
+          <Header />
+        </div>
+
+        {/* Main Content */}
+        <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-6">
+          <h1 className="text-4xl lg:text-6xl font-extrabold text-white leading-tight">
+            Një Hap Më Pranë <br /> Xhamisë Suaj
+          </h1>
+          <p className="mt-4 text-lg lg:text-xl font-medium text-gray-300 max-w-2xl">
+            Koha e namazit dhe ikametit, ngjarje, aktivitete, donacione, dhe
+            historiku i xhamisë – të gjitha në një vend.
+          </p>
+
+          {/* Store Logos */}
+          <div className="mt-6 flex space-x-4 justify-center">
+            <a
+              href="https://www.apple.com/app-store/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src={AppStoreLogo} alt="App Store" className="h-12 w-auto" />
+            </a>
+            <a
+              href="https://play.google.com/store"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src={GooglePlayLogo}
+                alt="Google Play"
+                className="h-12 w-auto"
+              />
+            </a>
+          </div>
+        </div>
 
         {/* Go Up Button */}
         <GoUpButton />
       </div>
+
       {/* Statistics Section */}
       <div className="relative pb-14 lg:py-12 top-10 bg-white">
         <div className="container mx-auto px-6 sm:px-12">
@@ -145,13 +131,13 @@ const LandingPage = () => {
 
       {/* Features Section */}
 
-      <div className="relative px-12 lg:px-20 py-14">
+      <div className="relative pb-14 lg:py-12 top-10 bg-white">
         <div className="container mx-auto px-6 sm:px-12 text-center">
           {/* Section Title */}
-          <h2 className="text-2xl sm:text-4xl font-semibold font-montserrat text-[#06A85D]">
+          <h2 className="text-3xl sm:text-4xl font-semibold font-montserrat text-[#06A85D]">
             Veçoritë
           </h2>
-          <p className="mt-4 text-base lg:text-lg font-medium font-montserrat text-black">
+          <p className="mt-4 text-[1.0625rem] lg:text-lg font-medium font-montserrat text-black">
             Zbulo veçoritë e aplikacionit
           </p>
 
@@ -223,10 +209,10 @@ const LandingPage = () => {
 
                 {/* Text at the bottom */}
                 <div className="absolute bottom-0 w-full p-4 py-6 text-white">
-                  <h3 className="relative text-sm w-[100%] sm:text-lg lg:text-xl font-extrabold font-montserrat text-left pb-2">
+                  <h3 className="relative text-[1.0625rem] w-[100%] sm:text-lg lg:text-xl font-extrabold font-montserrat text-left pb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-xs sm:text-base lg:text-base font-regular text-left w-[90%]">
+                  <p className="text-sm sm:text-base lg:text-base font-regular text-left w-[90%]">
                     {feature.description}
                   </p>
                 </div>
@@ -240,10 +226,10 @@ const LandingPage = () => {
       <div className="relative px-6 sm:px-12 py-14">
         {/* Section Title */}
         <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-4xl font-semibold font-montserrat text-[#06A85D]">
+          <h2 className="text-3xl sm:text-4xl font-semibold font-montserrat text-[#06A85D]">
             Rreth Nesh
           </h2>
-          <p className="mt-4 text-base lg:text-lg font-medium font-montserrat text-black">
+          <p className="mt-4 text-[1.0625rem] lg:text-lg font-medium font-montserrat text-black">
             Qëllimi i Aplikacionit
           </p>
         </div>
@@ -272,7 +258,7 @@ const LandingPage = () => {
 
           {/* Right Part */}
           <div className="text-center lg:text-left">
-            <p className="text-black text-sm text-center lg:text-left lg:text-lg font-regular font-montserrat leading-relaxed sm:flex sm:flex-col">
+            <p className="text-black text-base text-center lg:text-left lg:text-lg font-regular font-montserrat leading-relaxed sm:flex sm:flex-col">
               Xhamia Ime është një aplikacion modern që lidh xhematin me xhaminë
               e tyre. Ky aplikacion ofron çdo gjë që ju nevojitet, nga oraret e
               sakta të namazit deri te donacionet, aktivitetet dhe historiku i
@@ -280,9 +266,11 @@ const LandingPage = () => {
             </p>
 
             {/* Button */}
-            <button className="mt-6 px-6 py-3 text-sm lg:text-base lg:px-8 lg:py-3 bg-[#06A85D] text-white font-semibold rounded-lg shadow-md hover:bg-[#048048] transition">
-              Shiko Më Shumë
-            </button>
+            <Link to="/rrethnesh">
+              <button className="mt-6 px-6 py-3 text-base lg:text-base lg:px-8 lg:py-3 bg-[#06A85D] text-white font-semibold rounded-lg shadow-md hover:bg-[#048048] transition">
+                Shiko Më Shumë
+              </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -363,7 +351,7 @@ const LandingPage = () => {
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold font-montserrat text-white">
             Pyetjet më të shpeshta
           </h2>
-          <p className="mt-4 text-sm sm:text-base lg:text-lg font-medium font-montserrat text-white">
+          <p className="mt-4 text-base lg:text-lg font-medium font-montserrat text-white">
             A keni nevojë për ndihmë apo ndonjë pyetje në lidhje me
             aplikacionin?
           </p>
@@ -414,7 +402,7 @@ const LandingPage = () => {
           </h2>
 
           {/* Subtitle */}
-          <p className="mt-4 text-sm sm:text-base lg:text-lg font-medium font-montserrat text-black">
+          <p className="mt-4 text-base sm:text-base lg:text-lg font-medium font-montserrat text-black">
             Mos hezitoni të na kontaktoni
           </p>
 
@@ -436,24 +424,54 @@ const LandingPage = () => {
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
+  // Detect scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Check authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsLoggedIn(!!user); // Set to true if user exists, otherwise false
+      setIsLoggedIn(!!user);
     });
 
-    // Cleanup subscription on component unmount
     return () => unsubscribe();
   }, []);
 
   return (
-    <header className="relative z-20 flex items-center justify-between w-full px-6 py-4 lg:bg-transparent">
+    <header
+      className={`fixed top-0 left-0 w-full z-20 flex items-center justify-between px-6 py-4 transition-all duration-300 ease-in-out ${
+        scrolled ? "bg-[#06A85D] shadow-lg py-3" : "bg-transparent py-4"
+      }`}
+    >
+      {/* Background Layer (Only when scrolled) */}
+      <div
+        className={`absolute top-0 left-0 w-full h-full -z-10 transition-all duration-300 ease-in-out ${
+          scrolled ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <div className="h-[100%] w-full bg-[#06A85D]"></div>
+        <div className="h-[20%] w-full bg-[#2CC484]"></div>
+      </div>
+
+      {/* Logo & Navigation */}
       <div className="flex items-center">
         <Link to="/">
           <img src={Logo} alt="Logo" className="h-12 w-12 rounded-full" />
         </Link>
-        <div className="h-9 w-px bg-white mx-8 md:block hidden"></div>
-        <nav className="md:block hidden">
+        <div className="h-9 w-px bg-white mx-8 hidden md:block"></div>
+        <nav className="hidden md:block">
           <ul className="flex space-x-6 lg:space-x-10 font-montserrat font-medium">
             <li>
               <NavLink
@@ -499,7 +517,7 @@ const Header = () => {
         </nav>
       </div>
 
-      {/* Hamburger Menu */}
+      {/* Hamburger Menu (Mobile) */}
       <div className="md:hidden">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
@@ -525,8 +543,8 @@ const Header = () => {
       {/* Mobile Navbar */}
       {menuOpen && (
         <div
-          className={`fixed top-0 right-0 h-full w-4/5 bg-gradient-to-b from-green-100 to-white shadow-2xl rounded-l-3xl z-50 flex flex-col transform ${
-            menuOpen ? "menu-open" : "menu-slide-in"
+          className={`fixed top-0 right-0 h-full w-4/5 bg-gradient-to-b from-green-100 to-white shadow-2xl rounded-l-3xl z-50 flex flex-col transition-transform duration-300 transform ${
+            menuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           {/* Close Button */}
@@ -540,73 +558,35 @@ const Header = () => {
           {/* Navigation Links */}
           <nav className="flex-1 mt-16 px-6">
             <ul className="flex flex-col space-y-6 font-montserrat text-lg font-medium text-green-600">
-              <li className="flex items-center space-x-4">
-                <i className="fas fa-home"></i>
-                <NavLink
-                  to="/"
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "text-[#06A85D] font-bold "
-                      : "hover:text-green-800"
-                  }
-                >
+              <li>
+                <NavLink to="/" onClick={() => setMenuOpen(false)}>
                   Ballina
                 </NavLink>
               </li>
-              <li className="flex items-center space-x-4">
-                <i className="fas fa-info-circle"></i>
-                <NavLink
-                  to="/rrethnesh"
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "text-[#06A85D] font-bold "
-                      : "hover:text-green-800"
-                  }
-                >
+              <li>
+                <NavLink to="/rrethnesh" onClick={() => setMenuOpen(false)}>
                   Rreth Nesh
                 </NavLink>
               </li>
-              <li className="flex items-center space-x-4">
-                <i className="fas fa-phone-alt"></i>
-                <NavLink
-                  to="/kontakti"
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "text-[#06A85D] font-bold "
-                      : "hover:text-green-800"
-                  }
-                >
+              <li>
+                <NavLink to="/kontakti" onClick={() => setMenuOpen(false)}>
                   Kontakti
                 </NavLink>
               </li>
-              <li className="flex items-center space-x-4">
-                <i className="fas fa-mosque"></i>
-                <NavLink
-                  to="/xhamite"
-                  onClick={() => setMenuOpen(false)}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "text-[#06A85D] font-bold "
-                      : "hover:text-green-800"
-                  }
-                >
+              <li>
+                <NavLink to="/xhamite" onClick={() => setMenuOpen(false)}>
                   Xhamitë
                 </NavLink>
               </li>
             </ul>
           </nav>
 
-          {/* Kyçu Button */}
+          {/* Auth Button */}
           <div className="px-6 pb-8">
             <NavLink
               to={isLoggedIn ? "/dashboard" : "/kycu"}
-              onClick={() => {
-                setMenuOpen(false); // Close the menu
-              }}
-              className="w-full py-3 bg-[#06A85D] text-white font-montserrat rounded-3xl shadow-lg hover:shadow-xl hover:from-green-500 hover:to-green-300 transition-all duration-300 flex items-center justify-center"
+              onClick={() => setMenuOpen(false)}
+              className="w-full py-3 bg-[#06A85D] text-white font-montserrat rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
             >
               {isLoggedIn ? "Profili" : "Kyçu"}
             </NavLink>
@@ -614,9 +594,10 @@ const Header = () => {
         </div>
       )}
 
+      {/* Auth Button (Desktop) */}
       <NavLink
         to={isLoggedIn ? "/dashboard" : "/kycu"}
-        className="md:block hidden px-8 py-2 bg-primary text-white font-montserrat font-medium rounded-3xl hover:bg-primary-light hover:text-white"
+        className="hidden md:block px-8 py-2 bg-white text-primary font-montserrat font-medium rounded-3xl hover:bg-primary-light hover:text-white"
       >
         {isLoggedIn ? "Profili" : "Kyçu"}
       </NavLink>

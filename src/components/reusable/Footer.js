@@ -68,29 +68,25 @@ const Footer = () => {
             {/* Main Links */}
             <NavLink
               to="/"
-              className="text-base font-medium hover:underline"
-              activeClassName="font-bold"
+              className="text-base font-medium hover:underline active:font-bold"
             >
               Ballina
             </NavLink>
             <NavLink
               to="/rrethnesh"
-              className="text-base font-medium hover:underline"
-              activeClassName="font-bold"
+              className="text-base font-medium hover:underline active:font-bold"
             >
               Rreth Nesh
             </NavLink>
             <NavLink
               to="/kontakti"
-              className="text-base font-medium hover:underline"
-              activeClassName="font-bold"
+              className="text-base font-medium hover:underline active:font-bold"
             >
               Kontakti
             </NavLink>
             <NavLink
               to="/xhamite"
-              className="text-base font-medium hover:underline"
-              activeClassName="font-bold"
+              className="text-base font-medium hover:underline active:font-bold"
             >
               Xhamitë
             </NavLink>
@@ -101,15 +97,13 @@ const Footer = () => {
             {/* Differentiated Links */}
             <NavLink
               to="/termat-dhe-kushtet"
-              className="text-base font-medium hover:underline text-white"
-              activeClassName="font-bold text-white"
+              className="text-base font-medium hover:underline text-white active:font-bold active:text-white"
             >
               Termat Dhe Kushtet
             </NavLink>
             <NavLink
               to="/mbrojtja-e-te-dhenave"
-              className="text-base font-medium hover:underline text-white"
-              activeClassName="font-bold text-white"
+              className="text-base font-medium hover:underline text-white active:font-bold active:text-white"
             >
               Mbrojtja e Të Dhënave
             </NavLink>

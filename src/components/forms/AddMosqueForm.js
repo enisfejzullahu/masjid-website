@@ -142,7 +142,6 @@ const AddMosqueForm = ({ isOpen, onClose, onSubmit }) => {
               value={mosqueData.kontakti}
               onChange={handleChange}
               placeholder="Shkruani numrin e telefonit ose emailin"
-
             />
           </div>
           <div>
@@ -165,14 +164,14 @@ const AddMosqueForm = ({ isOpen, onClose, onSubmit }) => {
             <label htmlFor="hapur" className="block text-sm font-semibold mb-1">
               Disponueshmeria
             </label>
-              <input
-                type="text"
-                id="hapur"
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                value={mosqueData.hapur}
-                onChange={handleChange}
-                placeholder="Shkruani orarin (p.sh., 24/7)"
-              />
+            <input
+              type="text"
+              id="hapur"
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              value={mosqueData.hapur}
+              onChange={handleChange}
+              placeholder="Shkruani orarin (p.sh., 24/7)"
+            />
           </div>
 
           <div>

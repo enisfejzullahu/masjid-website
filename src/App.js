@@ -8,6 +8,8 @@ import {
 import { auth, db } from "./firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"; // Import toast styles
 
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutUs";
@@ -25,11 +27,14 @@ import Unauthorized from "./components/Unauthorized";
 import MosqueDetailPage from "./pages/MosqueDetailPage";
 import ResetPassword from "./components/ResetPassword";
 import MosqueDetails from "./components/MosqueDetails";
+import NoMosqueAssigned from "./components/NoMosqueAssigned";
+import ScrollToTop from "./components/ScrollTop";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState(null);
+  const [mosqueId, setMosqueId] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -37,7 +42,9 @@ function App() {
       if (user) {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
-          setUserRole(userDoc.data().role);
+          const userData = userDoc.data();
+          setUserRole(userData.role);
+          setMosqueId(userData.mosqueId || null); // Fetch mosqueId and handle null case
         }
       }
       setLoading(false);
@@ -59,6 +66,8 @@ function App() {
 
   return (
     <Router>
+      <ToastContainer />
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/rrethnesh" element={<AboutPage />} />
@@ -70,32 +79,42 @@ function App() {
         <Route path="/kycu" element={<LogIn />} />
 
         <Route
-          path="/dashboard"
+          path="/dashboard/*"
           element={
-            isAuthenticated ? (
-              userRole === "super-admin" ? (
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              {userRole === "super-admin" ? (
                 <AdminDashboard /> // Super-admin dashboard
               ) : userRole === "mosque-admin" ? (
-                <Dashboard /> // Mosque-admin dashboard
+                mosqueId ? (
+                  <Dashboard /> // Mosque-admin dashboard if mosqueId exists
+                ) : (
+                  <NoMosqueAssigned /> // Show the NoMosqueAssigned page if mosqueId is null
+                )
               ) : (
                 <Navigate to="/unauthorized" /> // Unauthorized user
-              )
-            ) : (
-              <Navigate to="/kycu" /> // Redirect unauthenticated users to login
-            )
+              )}
+            </ProtectedRoute>
           }
         />
-        <Route path="/dashboard/mosque/:id" element={<MosqueDetails/>} />
+
+        <Route
+          path="/dashboard/mosque/:id"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <MosqueDetails />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/konfirmo-email" element={<ConfirmEmail />} />
-        <Route
+        {/* <Route
           path="/admin"
           element={
             <AdminRoute>
               <AdminPanel />
             </AdminRoute>
           }
-        />
+        /> */}
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>

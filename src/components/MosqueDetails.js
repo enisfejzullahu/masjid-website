@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth"; // Firebase auth
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig"; // Adjust the path to match your project structure
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import axios from "axios";
 import Header from "./reusable/Header";
 import Footer from "./reusable/Footer";
@@ -8,9 +15,15 @@ const MosqueDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [mosque, setMosque] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+
   const [isEditing, setIsEditing] = useState(false);
   const [updatedData, setUpdatedData] = useState({});
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false); // State to manage confirmation dialog
+
+  const auth = getAuth();
+  const db = getFirestore();
+  const currentUser = auth.currentUser;
 
   useEffect(() => {
     const fetchMosqueDetails = async () => {
@@ -32,27 +45,147 @@ const MosqueDetails = () => {
     setUpdatedData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // const handleEditSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     await axios.put(`http://localhost:3001/mosques/${id}`, updatedData);
+  //     alert("Mosque updated successfully!");
+  //     setIsEditing(false);
+  //     setMosque(updatedData);
+  //   } catch (error) {
+  //     console.error("Error updating mosque:", error);
+  //     alert("Failed to update mosque.");
+  //   }
+  // };
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Get the user's Firebase ID token
+          const token = await user.getIdToken();
+          // console.log("Firebase ID Token:", token);
+          localStorage.setItem("token", token); // Save the token
+
+          // Fetch additional user information from Firestore
+          const userRef = doc(db, "users", user.uid);
+          const docSnap = await getDoc(userRef);
+
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            setUserInfo({
+              name: userData.fullName || "No name",
+              email: user.email,
+              role: userData.role || "User",
+              phoneNumber: userData.phoneNumber,
+              profilePic: userData.profilePic || "",
+            });
+          } else {
+            console.log("No such document!");
+          }
+        } catch (error) {
+          console.error("Error fetching user information:", error);
+        }
+      } else {
+        setUserInfo(null);
+        console.error("No user is currently logged in.");
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleEditSubmit = async (e) => {
     e.preventDefault();
+
+    if (!userInfo) {
+      toast.error("You must be signed in to edit this mosque.");
+      return;
+    }
+
     try {
-      await axios.put(`http://localhost:3001/mosques/${id}`, updatedData);
-      alert("Mosque updated successfully!");
-      setIsEditing(false);
-      setMosque(updatedData);
+      // Retrieve token and log it for debugging
+      const token = await auth.currentUser.getIdToken();
+      // console.log("Retrieved Token:", token);
+
+      // Fetch user role and assigned mosque
+      const userResponse = await axios.get("http://localhost:3001/user-info", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      // Make sure the response structure matches the backend
+      // console.log("Full User Info Response:", userResponse.data);
+
+      const { role, mosqueId: assignedMosqueId } = userResponse.data.user; // Destructure from 'user'
+
+      // console.log("Role from response:", role);
+      // console.log("Assigned Mosque ID from response:", assignedMosqueId);
+
+      // Logic for super-admin
+      if (role === "super-admin") {
+        await axios.put(`http://localhost:3001/mosques/${id}`, updatedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        toast.success("Xhamia u përditësua me sukses!");
+        setIsEditing(false);
+        setMosque(updatedData);
+        return;
+      }
+
+      // Logic for mosque-admin
+      if (role === "mosque-admin") {
+        if (assignedMosqueId !== id) {
+          toast.error(
+            "You are not authorized to edit this mosque. Please contact the super-admin."
+          );
+          return;
+        }
+
+        await axios.put(`http://localhost:3001/mosques/${id}`, updatedData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        toast.success("Mosque updated successfully by Mosque Admin!");
+        setIsEditing(false);
+        setMosque(updatedData);
+        return;
+      }
+
+      // Default fallback
+      toast.error("Ju nuk keni leje të mjaftueshme për të redaktuar këtë xhami.");
     } catch (error) {
-      console.error("Error updating mosque:", error);
-      alert("Failed to update mosque.");
+      console.error(
+        "Error updating mosque:",
+        error.response || error.message || error
+      );
+      toast.error("Dështoi përditësimi i xhamisë.");
     }
   };
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:3001/mosques/${id}`);
-      alert("Mosque deleted successfully!");
+      // Get the token (from wherever you store it, e.g., in localStorage or a context)
+      const token = await getAuth().currentUser.getIdToken();
+
+      // Make the DELETE request with the token in the Authorization header
+      await axios.delete(`http://localhost:3001/mosques/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Send the Firebase ID token in the Authorization header
+        },
+      });
+
+      toast.success("Xhamia u fshi me sukses!");
       navigate("/dashboard"); // Redirect to main dashboard after deletion
     } catch (error) {
-      console.error("Error deleting mosque:", error);
-      alert("Failed to delete mosque.");
+      console.error("Gabim gjatë fshirjes së xhamisë:", error);
+      toast.error("Dështoi fshirja e xhamisë.");
     }
   };
 
@@ -153,6 +286,23 @@ const MosqueDetails = () => {
                     className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
+                {/* Disponueshmeria */}
+                <div>
+                  <label
+                    htmlFor="disponueshmeria"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Disponueshmeria
+                  </label>
+                  <input
+                    type="text"
+                    id="disponueshmeria"
+                    name="disponueshmeria"
+                    value={updatedData.disponueshmeria || ""}
+                    onChange={handleInputChange}
+                    className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
               </div>
               <div className="mt-6">
                 <button
@@ -176,7 +326,9 @@ const MosqueDetails = () => {
               <p className="text-lg mb-2">Adresa: {mosque.adresa}</p>
               <p className="text-lg mb-2">Kontakti: {mosque.kontakti}</p>
               <p className="text-lg mb-4">Website: {mosque.website}</p>
-              <p className="text-lg mb-4">Disponueshmeria: {mosque.disponueshmeria}</p>
+              <p className="text-lg mb-4">
+                Disponueshmeria: {mosque.disponueshmeria}
+              </p>
               <button
                 onClick={() => setIsEditing(true)}
                 className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition duration-300"

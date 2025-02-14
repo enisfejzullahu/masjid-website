@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { query, collection, getDocs, updateDoc, doc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getAuth } from "firebase/auth";
 
 const UsersSection = () => {
   const [admins, setAdmins] = useState([]);
@@ -53,7 +55,6 @@ const UsersSection = () => {
     fetchData();
   }, []);
 
-  // Handle assigning mosque to user
   const handleAssign = async (userId) => {
     const mosqueId = selectedMosques[userId];
     if (!mosqueId) {
@@ -62,19 +63,35 @@ const UsersSection = () => {
     }
 
     try {
-      const userRef = doc(db, "users", userId);
-      await updateDoc(userRef, { mosqueId });
+      // Update mosqueId in Firestore
+      const userRef = doc(db, "users", userId); // Reference to the user document in Firestore
+      await updateDoc(userRef, { mosqueId }); // Update mosqueId field in the user document
 
-      setAdmins((prevAdmins) =>
-        prevAdmins.map((user) =>
-          user.id === userId ? { ...user, mosqueId } : user
-        )
+      // Make the API call to set custom claims
+      const response = await fetch(
+        "http://localhost:3001/roles/setCustomClaims",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uid: userId,
+            mosqueId: mosqueId,
+            fullName: admins.find((user) => user.id === userId).fullName,
+            role: "mosque-admin",
+          }),
+        }
       );
 
-      alert("Mosque assigned successfully!");
-      setModalData(null); // Close modal
+      if (response.ok) {
+        alert("Mosque assigned and custom claims set successfully!");
+      } else {
+        alert("Error assigning mosque. Please try again.");
+      }
     } catch (error) {
-      console.error("Error assigning mosque:", error);
+      console.error("Error assigning mosque or setting custom claims:", error);
+      alert("Error assigning mosque. Please try again.");
     }
   };
 
@@ -145,10 +162,7 @@ const UsersSection = () => {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredAdmins.map((user) => (
-            <div
-              key={user.id}
-              className="border rounded p-4 shadow"
-            >
+            <div key={user.id} className="border rounded p-4 shadow">
               <div>
                 <h2 className="text-lg font-bold">{user.fullName}</h2>
                 <p className="text-gray-600">Email: {user.email}</p>

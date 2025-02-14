@@ -1,186 +1,169 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { auth, db } from "../firebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { logout } from "../services/authService";
-import { onAuthStateChanged } from "firebase/auth";
-import Header from "./reusable/Header";
-import Footer from "./reusable/Footer";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
-const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [mosqueId, setMosqueId] = useState("");
-  const [mosqueData, setMosqueData] = useState(null);
+const Njoftimet = ({ mosqueId }) => {
+  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [text, setText] = useState("");
+  const [image, setImage] = useState(null);
+
+  const auth = getAuth();
+  const storage = getStorage();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-          if (userDoc.exists()) {
-            setUser(currentUser);
-            const mosqueIdFromDb = userDoc.data().mosqueId || "N/A";
-            setMosqueId(mosqueIdFromDb);
+    fetchAnnouncements();
+  }, [mosqueId]);
 
-            // Fetch mosque details
-            if (mosqueIdFromDb !== "N/A") {
-              const mosqueDoc = await getDoc(
-                doc(db, "mosques", mosqueIdFromDb)
-              );
-              if (mosqueDoc.exists()) {
-                setMosqueData(mosqueDoc.data());
-              } else {
-                console.error("No mosque data found in Firestore!");
-              }
-            }
-          } else {
-            console.error("No user data found in Firestore!");
-          }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        } finally {
-          setLoading(false);
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const token = await auth.currentUser.getIdToken();
+      console.log(token);
+      const response = await axios.get(
+        `http://localhost:3001/mosques/${mosqueId}/njoftimet`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-      } else {
-        navigate("/kycu");
-      }
-    });
-
-    return () => unsubscribe(); // Clean up listener
-  }, [navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/kycu");
-    } catch (error) {
-      console.error("Logout failed:", error);
+      );
+      setAnnouncements(response.data);
+      setError(null);
+    } catch (err) {
+      setAnnouncements([]);
+      setError("Failed to fetch announcements.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setMosqueData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
+  const handlePostAnnouncement = async () => {
+    if (!title || !text) {
+      alert("Ju lutem plotësoni të gjitha fushat!");
+      return;
+    }
 
-  const handleSaveChanges = async () => {
-    if (!mosqueId || !mosqueData) return;
+    const formData = new FormData();
+    console.log(formData);
+
+    formData.append("title", title);
+    formData.append("text", text);
+    if (image) formData.append("image", image);
 
     try {
-      const mosqueRef = doc(db, "mosques", mosqueId);
-      await updateDoc(mosqueRef, mosqueData);
-      alert("Mosque details updated successfully!");
+      const token = await auth.currentUser.getIdToken();
+      await axios.post(
+        `http://localhost:3001/mosques/${mosqueId}/njoftimet`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      alert("Njoftimi u shtua me sukses!");
+      setShowModal(false);
+      fetchAnnouncements(); // Refresh the announcement list
     } catch (error) {
-      console.error("Error updating mosque details:", error);
-      alert("Failed to update mosque details.");
+      alert("Ndodhi një gabim gjatë postimit të njoftimit.");
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="ml-4 text-lg text-primary font-semibold">
+          Duke ngarkuar...
+        </p>
+      </div>
+    );
+  if (error) return <p>{error}</p>;
 
   return (
-    <div className="relative min-h-screen flex flex-col">
-      <Header />
-      <div className="flex flex-col items-center justify-center p-6">
-        <h1 className="text-3xl font-bold text-primary mb-6 pt-8">
-          Paneli Kryesor
-        </h1>
-        {user ? (
-          <>
-            {mosqueId === "N/A" || !mosqueId ? (
-              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 max-w-3xl">
-                <p className="font-bold">Njoftim</p>
-                <p>
-                  Ju ende nuk jeni caktuar në një xhami. Ju lutem prisni ose
-                  kontaktoni mbështetjen për ndihmë.
-                </p>
-              </div>
-            ) : (
-              <>
-                <p>
-                  Your Mosque ID: <strong>{mosqueId}</strong>
-                </p>
-                <p>
-                  Welcome, <strong>{user.email}</strong>
-                </p>
-
-                {mosqueData && (
-                  <div className="w-full max-w-md mt-6">
-                    <h2 className="text-2xl font-semibold mb-4">
-                      Edit Mosque Details
-                    </h2>
-                    <form className="space-y-4">
-                      <div>
-                        <label className="block font-medium">Mosque Name</label>
-                        <input
-                          type="text"
-                          name="name"
-                          value={mosqueData.name || ""}
-                          onChange={handleInputChange}
-                          className="w-full border border-gray-300 rounded-lg p-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-medium">Location</label>
-                        <input
-                          type="text"
-                          name="location"
-                          value={mosqueData.location || ""}
-                          onChange={handleInputChange}
-                          className="w-full border border-gray-300 rounded-lg p-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-medium">
-                          Contact Info
-                        </label>
-                        <input
-                          type="text"
-                          name="contactInfo"
-                          value={mosqueData.contactInfo || ""}
-                          onChange={handleInputChange}
-                          className="w-full border border-gray-300 rounded-lg p-2"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleSaveChanges}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700"
-                      >
-                        Save Changes
-                      </button>
-                    </form>
-                  </div>
-                )}
-              </>
-            )}
-            <button
-              onClick={handleLogout}
-              style={{
-                backgroundColor: "red",
-                color: "white",
-                border: "none",
-                padding: "10px 15px",
-                borderRadius: "5px",
-                cursor: "pointer",
-                marginTop: "20px",
-              }}
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <p>Failed to load user data. Please try again later.</p>
-        )}
+    <div className="mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Njoftimet</h2>
+        <button
+          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+          onClick={() => setShowModal(true)}
+        >
+          Shto Njoftim
+        </button>
       </div>
-      <Footer />
+
+      {announcements.length === 0 ? (
+        <div className="text-center mt-8">
+          <p className="text-gray-600">Nuk keni bërë asnjë njoftim.</p>
+          <button
+            className="bg-blue-600 text-white mt-4 px-4 py-2 rounded-md hover:bg-blue-700"
+            onClick={() => setShowModal(true)}
+          >
+            Bëni njoftimin e parë tuajin
+          </button>
+        </div>
+      ) : (
+        announcements.map(({ id, Text, text, datePosted, imageUrl }) => (
+          <div key={id} className="p-4 mb-4 bg-white shadow-md rounded-md">
+            <h3 className="font-semibold text-lg">{Text}</h3>
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt={Text}
+                className="w-full h-40 object-cover rounded-md my-2"
+              />
+            )}
+            <p>{text}</p>
+          </div>
+        ))
+      )}
+
+      {/* Modal for Adding Announcement */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Shto Njoftim</h2>
+            <input
+              type="text"
+              placeholder="Titulli i njoftimit"
+              className="border w-full p-2 mb-4 rounded-md"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            <textarea
+              placeholder="Teksti i njoftimit"
+              className="border w-full p-2 mb-4 rounded-md"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+            <input
+              type="file"
+              className="mb-4"
+              onChange={(e) => setImage(e.target.files[0])}
+            />
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+                onClick={() => setShowModal(false)}
+              >
+                Anulo
+              </button>
+              <button
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                onClick={handlePostAnnouncement}
+              >
+                Posto Njoftimin
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Dashboard;
+export default Njoftimet;

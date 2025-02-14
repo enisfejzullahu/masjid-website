@@ -18,7 +18,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="relative z-20 flex items-center justify-between w-full px-6 py-4 lg:bg-transparent">
+    <header className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 lg:bg-transparent bg-[#06A85D]">
       {/* Background split */}
       <div className="absolute top-0 left-0 w-full h-full -z-10">
         <div className="h-[100%] w-full bg-[#06A85D]"></div>

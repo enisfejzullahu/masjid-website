@@ -47,15 +47,14 @@ const MosquesPage = () => {
       <Header />
       <main className="flex flex-col items-center px-4 sm:px-6 py-8 sm:py-12">
         {/* Page Title */}
-        <h1 className="text-2xl sm:text-3xl font-semibold text-primary mb-4 text-center">
+        <h1 className="text-3xl lg:text-4xl font-extrabold text-primary text-center mt-14 lg:mt-8 mb-10">
           Xhamitë
         </h1>
 
         {/* Subtitle */}
         <p className="text-base sm:text-lg text-black text-center mb-8 mx-auto max-w-2xl">
           Shikoni oraret e namazit dhe informacionin bazë për xhamitë e
-          regjistruara.
-          Për funksionalitete të plota, shkarkoni aplikacionin{" "}
+          regjistruara. Për funksionalitete të plota, shkarkoni aplikacionin{" "}
           <span className="font-semibold">Xhamia Ime</span>.
         </p>
 
